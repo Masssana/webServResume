@@ -8,6 +8,9 @@ public class Resume {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+//    @Version
+//    private Integer version;
+
     private Integer course;
     private String name;
 

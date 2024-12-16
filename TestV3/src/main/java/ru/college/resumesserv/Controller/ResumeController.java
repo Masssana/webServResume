@@ -1,5 +1,6 @@
 package ru.college.resumesserv.Controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,7 +17,7 @@ import jakarta.persistence.criteria.Predicate;
 @RequestMapping("/api/resume")
 @CrossOrigin(origins = "*")
 public class ResumeController {
-
+    @Autowired
     private final ResumeRepository resumeRepository;
 
     @GetMapping("/test")
@@ -70,13 +71,16 @@ public class ResumeController {
 
     //  Создать новое резюме
     @PostMapping("/add")
-    public ResponseEntity<Resume> createResume(@RequestBody Resume resume) {
-        Resume savedResume = resumeRepository.save(resume);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedResume);
+    public ResponseEntity<?> createResume(@RequestBody Resume resume) {
+        if (resume.getId() != null && resume.getId() != 0) {
+            return ResponseEntity.badRequest().body("ID should not be provided for new resumes");
+        }
+        resume.setId(null); // явно удаляем ID
+        return ResponseEntity.ok(resumeRepository.save(resume));
     }
 
     // 4. Обновить существующее резюме
-    @PutMapping("/{id}")
+    @PutMapping("/update/{id}")
     public ResponseEntity<Resume> updateResume(@PathVariable Long id, @RequestBody Resume updatedResume) {
         return resumeRepository.findById(id)
                 .map(existingResume -> {
@@ -93,6 +97,7 @@ public class ResumeController {
                 })
                 .orElse(ResponseEntity.notFound().build());
     }
+
 
     //  Удалить резюме
     @DeleteMapping("/{id}")
